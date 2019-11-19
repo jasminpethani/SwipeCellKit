@@ -56,6 +56,7 @@ class SwipeActionsView: UIView {
             
             setNeedsLayout()
             layoutIfNeeded()
+            subviews.forEach { $0.setNeedsDisplay() }
             
             notifyVisibleWidthChanged(oldWidths: preLayoutVisibleWidths,
                                       newWidths: transitionLayout.visibleWidthsForViews(with: layoutContext))
@@ -63,7 +64,7 @@ class SwipeActionsView: UIView {
     }
 
     var preferredWidth: CGFloat {
-        return minimumButtonWidth * CGFloat(actions.count) + safeAreaMargin
+        return 0 //minimumButtonWidth * CGFloat(actions.count) + safeAreaMargin
     }
 
     var contentSize: CGSize {
@@ -141,15 +142,16 @@ class SwipeActionsView: UIView {
     func addButtons(for actions: [SwipeAction], withMaximum size: CGSize, contentEdgeInsets: UIEdgeInsets) -> [SwipeActionButton] {
         let buttons: [SwipeActionButton] = actions.map({ action in
             let actionButton = SwipeActionButton(action: action)
-            actionButton.addTarget(self, action: #selector(actionTapped(button:)), for: .touchUpInside)
+			//actionButton.addTarget(self, action: #selector(actionTapped(button:)), for: .touchUpInside)
             actionButton.autoresizingMask = [.flexibleHeight, orientation == .right ? .flexibleRightMargin : .flexibleLeftMargin]
             actionButton.spacing = options.buttonSpacing ?? 8
             actionButton.contentEdgeInsets = buttonEdgeInsets(fromOptions: options)
+			actionButton.isEnabled = action.isEnabled
             return actionButton
         })
         
         let maximum = options.maximumButtonWidth ?? (size.width - 30) / CGFloat(actions.count)
-        let minimum = options.minimumButtonWidth ?? min(maximum, 74)
+        let minimum = options.minimumButtonWidth ?? min(maximum, 20)
         minimumButtonWidth = buttons.reduce(minimum, { initial, next in max(initial, next.preferredWidth(maximum: maximum)) })
         
         
